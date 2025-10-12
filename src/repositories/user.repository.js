@@ -5,11 +5,12 @@ import AuthController  from "../controllers/auth.controller.js";
 class UserRepository {
     static async createUser(name, email, password){
         //Logica de interaccion con la DB para crear el usuario
-        return await Users.insertOne({
+        await Users.insertOne({
             name: name,
             email: email,
             password: password,
         })
+        return new_user
     }
 
     static async getAll (){

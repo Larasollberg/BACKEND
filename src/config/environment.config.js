@@ -7,7 +7,8 @@ dotenv.config()
 const ENVIRONMENT = {
     MONGODB_URI_STRING: process.env.MONGODB_URI_STRING,
     GMAIL_PASSWORD: process.env.GMAIL_PASSWORD,
-    JWT_SECRET_KEY: process.env.JWT_SECRET_KEY
+    JWT_SECRET_KEY: process.env.JWT_SECRET_KEY,
+    URL_API_BACKEND: process.env.URL_API_BACKEND
 }
 
 export default ENVIRONMENT

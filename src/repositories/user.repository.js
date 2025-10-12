@@ -1,4 +1,4 @@
-import Users from "../models/User.model.js";
+import Users from "../models/user.model.js";
 import AuthController  from "../controllers/auth.controller.js";
 
 

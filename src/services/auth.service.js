@@ -79,7 +79,7 @@ class AuthService {
             throw new ServerError(404, 'Email no registrado')
         }
         if(user.verified_email === false){
-            throw new ServerError(401, 'Email no ferificado')
+            throw new ServerError(401, 'Email no verificado')
         }
         /* Permite saber si cierto valor es igual a otro cierto valor encriptado */
         const is_same_password = await bcrypt.compare(password, user.password)

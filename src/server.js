@@ -53,3 +53,4 @@ app.listen(
     }
 )
 
+console.log(ENVIRONMENT)

@@ -53,4 +53,9 @@ app.listen(
     }
 )
 
-console.log(ENVIRONMENT)
+
+//UserRepository.createUser('Test2', 'larisollberg@gmail.com', 'lara5565')
+UserRepository.getByEmail('lsollberg@gmail.com').then(result => console.log(result))
+
+
+

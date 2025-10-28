@@ -9,13 +9,19 @@ import authMiddleware from '../middleware/auth.middleware.js'
 
 const workspace_router = express.Router()
 
+workspace_router.use(authMiddleware)
 
-workspace_router.get('/', authMiddleware, WorkspaceController.getAll )
+workspace_router.get('/', WorkspaceController.getAll )
 
 
-workspace_router.get('/:workspace_id', authMiddleware, WorkspaceController.getById )
+workspace_router.get('/:workspace_id', WorkspaceController.getById )
 
-//Crear el WorkspaceController con los metodos .post, .getById, getAll
+workspace_router.post(
+    '/:workspace_id/invite', 
+    workspaceMiddleware(['admin']),
+    WorkspaceController.inviteMember
+)
+
 
 //Este es el endpoint para crear workspaces
 workspace_router.post('/', authMiddleware, WorkspaceController.post)

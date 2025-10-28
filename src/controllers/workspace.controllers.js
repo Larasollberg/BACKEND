@@ -1,4 +1,5 @@
 import ENVIRONMENT from "../config/environment.config.js"
+import transporter from "../config/mailer.config.js"
 import MemberWorkspaceRepository from "../repositories/membersWorkspace.repository.js"
 import UserRepository from "../repositories/user.repository.js"
 import WorkspacesRepository from "../repositories/workspace.repository.js"
@@ -49,7 +50,7 @@ class WorkspaceController {
         try {
             const workspace_id = request.params.workspace_id
 
-            if (inNan(workspace_id)) {
+            if (validarId(workspace_id)) {
                 const workspace = await WorkspacesRepository.getById(workspace_id)
 
                 if (!workspace) {
@@ -167,6 +168,89 @@ class WorkspaceController {
             }
         }
 
+    }
+
+    static async inviteMember(request, response) {
+        try {
+            
+            const { member, workspace, user } = request
+            const { invited_email } = request.body
+            
+            //Buscar al usuario y validar que exista y este activo
+            const user_invited = await UserRepository.getByEmail(invited_email)
+            console.log({ user_invited })
+            
+            if (!user_invited) {
+                throw new ServerError(404, 'Usuario no encontrado')
+            }
+            //Verificar que NO es miembro actual de ese workspace 
+            const member_data = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_invited._id, workspace._id)
+
+            if (member_data) {
+                throw new ServerError(409, `Usuario con email ${invited_email} ya es miembro del workspace`)
+            }
+
+            const id_inviter = member._id
+            const invite_token = jwt.sign(
+                {
+                    id_invited: user_invited._id,
+                    email_invited: invited_email,
+                    id_workspace: workspace._id,
+                    id_inviter: id_inviter
+                },
+                ENVIRONMENT.JWT_SECRET_KEY,
+                {
+                    expiresIn: '30d'
+                }
+            )
+
+            //Enviar mail de invitacion al usuario invitado
+
+
+            await transporter.sendMail(
+                {
+                    from: ENVIRONMENT.GMAIL_USERNAME,
+                    to: invited_email,
+                    subject: 'Invitacion al workspace',
+                    html: `<h1>El usuario: ${user.email} te ha enviado una invitación
+                            al workspace ${workspace.nombre}<h1/>
+                            <a href='${ENVIRONMENT.URL_API_BACKEND}/api/members/confirm-invitation/${invite_token}'>
+                                Click para aceptar
+                            <a/>
+                            `
+                }
+            )
+
+            response.status(200).json({
+                ok: true,
+                status: 200,
+                message:'Usuario invitado con exito',
+                data: null
+            })
+
+        }
+        catch (error) {
+            console.log(error)
+            //Evaluamos si es un error que nosotros definimos
+            if (error.status) {
+                return response.status(error.status).json(
+                    {
+                        ok: false,
+                        status: error.status,
+                        message: error.message
+                    }
+                )
+            }
+            else {
+                return response.status(500).json(
+                    {
+                        ok: false,
+                        status: 500,
+                        message: 'Error interno del servidor'
+                    }
+                )
+            }
+        }
     }
 
 }

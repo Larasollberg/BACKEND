@@ -6,14 +6,11 @@ connectMongoDB()
 
 import express from 'express';
 import UserRepository from "./repositories/user.repository.js";
-import WorkspacesRepository from "./repositories/workspace.repository.js";
-import { validarId } from "./utils/validations.utils.js";
-import mongoose from "mongoose";
 import auth_router from "./routes/auth.router.js";
-import jwt from 'jsonwebtoken'
 import cors from 'cors'
 import authMiddleware from './middleware/auth.middleware.js';
 import MemberWorkspaceRepository from './repositories/membersWorkspace.repository.js';
+import member_router from "./routes/member.router.js";
 
 /*
 Sing: se usa p firmar tokens
@@ -35,6 +32,7 @@ app.use(express.json())
 
 app.use('/api/workspace', workspace_router)
 app.use('/api/auth', auth_router)
+app.use('/api/members', member_router)
 
 
 

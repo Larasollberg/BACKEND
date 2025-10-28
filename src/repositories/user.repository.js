@@ -14,8 +14,10 @@ class UserRepository {
         
         `
         const [result, field_packet] = await pool.execute(query,[email, name, password])
+        
         const user_created = await UserRepository.getById(result.insertId)
         console.log(user_created)
+        
         return user_created
     }
     
@@ -58,6 +60,7 @@ class UserRepository {
         )
         .join(' , ')
         const values = Object.values(new_values)
+        
         const query = `UPDATE Users SET  ${fields_querys} WHERE _id = ? `
         pool.execute(query, [...values, user_id])
     }
@@ -65,9 +68,9 @@ class UserRepository {
 
     static async getByEmail(email){
         const query = `
-            SELECT * FROM Users WHERE email = ?
+            SELECT * FROM Users WHERE email = ? AND active = 1
         `
-        const [result] = await pool.execute(query, [email])
+        const [result] = await pool.execute(query, [email]);
         const user_found = result [0];
         if(!user_found){
             return null

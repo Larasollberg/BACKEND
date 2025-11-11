@@ -29,7 +29,7 @@ class UserRepository {
             user_id,
             new_values,
             {
-                new: true //Cuando se haga la actualizacion nos traiga el objeto actualizado
+                new: true 
             }
         )
 

@@ -4,29 +4,104 @@ import jwt from 'jsonwebtoken'
 
 const authMiddleware = (request, response, next) => {
 
-    //El token de authorizacion se suele pasar por header, especificamente por el header 'Authorization'
-    //Formato esperado 'Bearer token_value' 
-    try{
+    try {
         const authorization_header = request.headers.authorization
-        if(!authorization_header){
+        if (!authorization_header) {
             throw new ServerError(400, 'No hay header de autorizacion')
         }
         const auth_token = authorization_header.split(' ').pop()
-        if(!auth_token){
+        if (!auth_token) {
             throw new ServerError(400, 'No hay token de autorizacion')
         }
 
         const user_data = jwt.verify(auth_token, ENVIRONMENT.JWT_SECRET_KEY)
 
-        //guardamos los datos del token en la request, cosa de que otros controladores puedan acceder a quien es
+        //HOT POINT: GUARDE LOS DATOS DE SESION EN LA REQUEST
         request.user = user_data
+
         next()
     }
-    catch(error){
+    catch (error) {
         console.log(error)
-            if(error instanceof jwt.JsonWebTokenError){
+        if (error instanceof jwt.JsonWebTokenError) {
 
-                return  response.status(401).json(
+            return response.status(401).json(
+                {
+                    ok: false,
+                    status: 401,
+                    message: 'Token invalido'
+                }
+            )
+        }
+        else if (error instanceof jwt.TokenExpiredError) {
+            return response.status(401).json(
+                {
+                    ok: false,
+                    status: 401,
+                    message: 'Token expirado'
+                }
+            )
+        }
+        else if (error.status) {
+            return response.status(error.status).json(
+                {
+                    ok: false,
+                    status: error.status,
+                    message: error.message
+                }
+            )
+        }
+        else {
+            return response.status(500).json(
+                {
+                    ok: false,
+                    status: 500,
+                    message: 'Error interno del servidor'
+                }
+            )
+        }
+    }
+
+}
+
+export default authMiddleware
+
+
+/* 
+2da version de auth middleware con roles
+*/
+
+export const authByRoleMiddleware = (valid_roles = []) => {
+
+
+    return (request, response, next) => {
+
+        try {
+            const authorization_header = request.headers.authorization
+            if (!authorization_header) {
+                throw new ServerError(400, 'No hay header de autorizacion')
+            }
+            const auth_token = authorization_header.split(' ').pop()
+            if (!auth_token) {
+                throw new ServerError(400, 'No hay token de autorizacion')
+            }
+
+            const user_data = jwt.verify(auth_token, ENVIRONMENT.JWT_SECRET_KEY)
+
+            //Si no se establecio una lista de roles validos, tomar cualquier role como valido
+            //Si de la sesion del usuario, el rol del usuario NO esta incluido dentro de la lista de roles valida
+            if(valid_roles.length > 0 && !valid_roles.includes(user_data.role)){
+                throw new ServerError(403, 'No permitido')
+            }
+
+            request.user = user_data
+            next()
+        }
+        catch (error) {
+            console.log(error)
+            if (error instanceof jwt.JsonWebTokenError) {
+
+                return response.status(401).json(
                     {
                         ok: false,
                         status: 401,
@@ -61,9 +136,8 @@ const authMiddleware = (request, response, next) => {
                     }
                 )
             }
+        }
+
     }
 
 }
-
-export default authMiddleware
-

@@ -1,38 +1,44 @@
 import ENVIRONMENT from "./config/environment.config.js";
-import connectMongoDB from "./config/mongoDB.config.js";
-import workspace_router from "./routes/workspace.route.js";
+import connectMongoDB from "./config/configMongoDB.config.js";
+import workspace_router from "./routes/workspace.router.js";
+
 
 connectMongoDB()
-
-import express from 'express';
-import UserRepository from "./repositories/user.repository.js";
+import 'dotenv/config'
+import express from 'express'
 import auth_router from "./routes/auth.router.js";
+import UserRepository from "./repositories/user.repository.js";
 import cors from 'cors'
-import authMiddleware from './middleware/auth.middleware.js';
-import MemberWorkspaceRepository from './repositories/membersWorkspace.repository.js';
+import authMiddleware from "./middleware/auth.middleware.js";
+import MemberWorkspaceRepository from "./repositories/memberWorkspace.repository.js";
 import member_router from "./routes/member.router.js";
+import pool from "./config/mysql.config.js";
+import ChannelMessageRepository from "./repositories/channelMessage.repository.js";
 
-/*
-Sing: se usa p firmar tokens
-    .- payload: carga util, info que lleva el token (es el objeto que sera guardado dentro del token, NO apto info sensible)
-    
-    .- clave secreta para firmar: si roban esta clave, los tokens son inseguros
-
-    .- configuraciones: por ej, fecha de expiraciones
-*/
-
+console.log('CLAVE SECRETA CARGADA:', process.env.JWT_SECRET_KEY);
 
 const app = express()
-
 
 app.use(cors())
 app.use(express.json())
 
-
-
-app.use('/api/workspace', workspace_router)
 app.use('/api/auth', auth_router)
+app.use('/api/workspace', workspace_router)
 app.use('/api/members', member_router)
+
+app.get('/api/status', (request, response) => {
+    response.send({
+        ok: true,
+        message: 'Esto esta funcionando'
+    })
+})
+
+app.get('/api/ping', (request, response) => {
+    response.send({
+        ok: true,
+        message: 'pong'
+    })
+})
 
 
 
@@ -44,16 +50,13 @@ app.get('/ruta-protegida', authMiddleware, (request, response) => {
 })
 
 
+
 app.listen(
-    8080, 
+    3000, 
     () => {
         console.log("Esto esta funcionado")
     }
 )
-
-
-//UserRepository.createUser('Test2', 'larisollberg@gmail.com', 'lara5565')
-UserRepository.getByEmail('lsollberg@gmail.com').then(result => console.log(result))
 
 
 

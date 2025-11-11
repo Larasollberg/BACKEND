@@ -1,4 +1,4 @@
-import MemberWorkspaceRepository from "../repositories/membersWorkspace.repository.js"
+import MemberWorkspaceRepository from "../repositories/memberWorkspace.repository.js"
 import WorkspacesRepository from "../repositories/workspace.repository.js"
 import { ServerError } from "../utils/customError.utils.js"
 
@@ -22,7 +22,6 @@ function workspaceMiddleware(valid_member_roles = []) {
 
             //Checkear que el usuario sea MIEMBRO de workspace
             const member_user_data = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user.id, workspace_id)
-
             if (!member_user_data) {
                 throw new ServerError(403, 'No tienes permiso para realizar esta operacion')
             }

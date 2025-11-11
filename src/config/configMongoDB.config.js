@@ -5,8 +5,6 @@ import ENVIRONMENT from './environment.config.js'
 async function connectMongoDB() {
     try{
         await mongoose.connect(ENVIRONMENT.MONGODB_URI_STRING, {
-        /*      useNewUrlParser: true, 
-            useUnifiedTopology: true,  */
             timeoutMS: 60000,
             socketTimeoutMS: 60000
         })

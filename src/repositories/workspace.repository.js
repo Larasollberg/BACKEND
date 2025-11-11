@@ -1,5 +1,5 @@
-import Workspaces from "../models/Workspace.model.js"
 import pool from "../config/mysql.config.js"
+import Workspaces from "../models/Workspace.model.js"
 
 export const WORKSPACE_TABLE = {
     NAME: 'Workspaces',
@@ -13,8 +13,9 @@ export const WORKSPACE_TABLE = {
     }
 }
 
-//VERSION MYSQL
 class WorkspacesRepository {
+
+
     static async createWorkspace(name, url_image) {
 
         const query = `INSERT INTO ${WORKSPACE_TABLE.NAME} (${WORKSPACE_TABLE.COLUMNS.NAME},${WORKSPACE_TABLE.COLUMNS.URL_IMAGE}) VALUES (?,?)`
@@ -22,14 +23,37 @@ class WorkspacesRepository {
 
         return result.insertId
     }
-    
+
+    /* static async createWorkspace(
+        name, 
+        url_image
+    ){
+        await Workspaces.insertOne({
+            name: name,
+            url_image: url_image
+        })
+        return true
+        
+    } */
+    //Pasar a mysql
     static async getAll() {
 
         const query = `SELECT * FROM ${WORKSPACE_TABLE.NAME}`
         const [result] = await pool.execute(query)
         return result
     }
-    
+    /* static async getAll (){
+
+
+        const workspaces_get = await Workspaces.find()
+
+        return workspaces_get
+    } */
+
+    /*  static async getById (workspaces_id){
+         const workspaces_found = await Workspaces.findById(workspaces_id)
+         return workspaces_found
+     } */
 
     static async getById(workspace_id) {
         const query = `
@@ -43,7 +67,10 @@ class WorkspacesRepository {
         return workspace_found;
     }
 
-    
+    /*  static async deleteById(workspaces_id) {
+         await Workspaces.findByIdAndDelete(workspaces_id)
+         return true
+     } */
 
     static async deleteById(workspace_id) {
         const query = `DELETE FROM ${WORKSPACE_TABLE.NAME} WHERE ${WORKSPACE_TABLE.COLUMNS.ID} = ?`;
@@ -51,7 +78,20 @@ class WorkspacesRepository {
         return result.affectedRows > 0;
     }
 
-    
+    /* static async updateById(
+        workspaces_id,
+        new_values
+    ) {
+        const workspace_updated = await Workspaces.findByIdAndUpdate(
+            workspaces_id,
+            new_values,
+            {
+                new: true
+            }
+        )
+        return workspace_updated
+    }
+ */
 
     static async updateById(workspace_id, new_values) {
         const update_fields = Object.keys(new_values);
@@ -66,52 +106,4 @@ class WorkspacesRepository {
     }
 }
 
-//VERSION MONGODB
-
-/* static async createWorkspace(
-        name, 
-        url_image
-    ){
-        await Workspaces.insertOne({
-            name: name,
-            url_image: url_image
-        })
-        return true
-        
-    } */
-
-    /* static async getAll (){
-
-
-        const workspaces_get = await Workspaces.find()
-
-        return workspaces_get
-    } */
-
-    /*  static async getById (workspaces_id){
-        const workspaces_found = await Workspaces.findById(workspaces_id)
-        return workspaces_found
-     } */
-
-        /*  static async deleteById(workspaces_id) {
-        await Workspaces.findByIdAndDelete(workspaces_id)
-        return true
-     } */
-
-        /* static async updateById(
-        workspaces_id,
-        new_values
-    ) {
-        const workspace_updated = await Workspaces.findByIdAndUpdate(
-            workspaces_id,
-            new_values,
-            {
-                new: true
-            }
-        )
-        return workspace_updated
-    }
- */
 export default WorkspacesRepository
-
-

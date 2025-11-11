@@ -1,6 +1,7 @@
 import ENVIRONMENT from "../config/environment.config.js"
 import transporter from "../config/mailer.config.js"
-import MemberWorkspaceRepository from "../repositories/membersWorkspace.repository.js"
+import ChannelRepository from "../repositories/channel.repository.js"
+import MemberWorkspaceRepository from "../repositories/memberWorkspace.repository.js"
 import UserRepository from "../repositories/user.repository.js"
 import WorkspacesRepository from "../repositories/workspace.repository.js"
 import { ServerError } from "../utils/customError.utils.js"
@@ -61,13 +62,14 @@ class WorkspaceController {
                     )
                 }
                 else {
-
+                    const channels = await ChannelRepository.getAllByWorkspace(workspace._id)
                     return response.json(
                         {
                             ok: true,
                             message: `Workspace con id ${workspace._id} obtenido`,
                             data: {
-                                workspace: workspace
+                                workspace: workspace,
+                                channels
                             }
                         }
                     )
@@ -120,24 +122,23 @@ class WorkspaceController {
                     "el campo 'name' debe ser un string de menos de 30 caracteres"
                 )
             }
-            else if (!url_img || typeof (url_img) !== 'string') {
+           /*  else if (!url_img || typeof (url_img) !== 'string') {
                 throw new ServerError(
                     400,
                     "el campo 'url_img' debe ser un string de menos de 30 caracteres"
                 )
-            }
+            } */
             else {
                 //Creamos el workspace con el repository
                 const workspace_id_created = await WorkspacesRepository.createWorkspace(name, url_img)
-                
-                if(workspace_id_created){
+                if (!workspace_id_created) {
                     throw new ServerError(
                         500,
                         'Error al crear el workspace'
                     )
                 }
-                await MemberWorkspaceRepository.create( request.user.id, 'admin')
-                //Si todo salio bien respondemos:
+                await MemberWorkspaceRepository.create(request.user.id, workspace_id_created, 'admin')
+                //Si todo salio bien respondemos con {ok: true, message: 'Workspace creado con exito'}
                 return response.status(201).json({
                     ok: true,
                     status: 201,
@@ -170,6 +171,7 @@ class WorkspaceController {
 
     }
 
+
     static async inviteMember(request, response) {
         try {
             
@@ -179,17 +181,24 @@ class WorkspaceController {
             //Buscar al usuario y validar que exista y este activo
             const user_invited = await UserRepository.getByEmail(invited_email)
             console.log({ user_invited })
-            
             if (!user_invited) {
                 throw new ServerError(404, 'Usuario no encontrado')
             }
             //Verificar que NO es miembro actual de ese workspace 
-            const member_data = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(user_invited._id, workspace._id)
+            const member_data = await MemberWorkspaceRepository.getMemberWorkspaceByUserIdAndWorkspaceId(
+                user_invited._id, workspace._id
+            )
 
             if (member_data) {
                 throw new ServerError(409, `Usuario con email ${invited_email} ya es miembro del workspace`)
             }
 
+            /* Crear un token con {
+                id_invitado,
+                id_workspace,
+                id_invitador
+            } CON JWT
+            */
             const id_inviter = member._id
             const invite_token = jwt.sign(
                 {
@@ -200,7 +209,7 @@ class WorkspaceController {
                 },
                 ENVIRONMENT.JWT_SECRET_KEY,
                 {
-                    expiresIn: '30d'
+                    expiresIn: '7d'
                 }
             )
 
@@ -252,6 +261,7 @@ class WorkspaceController {
             }
         }
     }
+
 
 }
 

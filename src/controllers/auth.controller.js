@@ -1,19 +1,18 @@
+import ENVIRONMENT from "../config/environment.config.js"
 import AuthService from "../services/auth.service.js"
 import { ServerError } from "../utils/customError.utils.js"
 
 class AuthController {
     static async register(request, response) {
         try {
-            /* 
-            Recibiremos un username, email, password
-            Validar los 3 campos
-            */
+
             const {
                 username, 
                 email, 
                 password
             } = request.body
             console.log(request.body)
+            
             if(!username){
                 throw new ServerError(
                     400, 
@@ -32,7 +31,7 @@ class AuthController {
                     'Debes enviar una contraseña valida'
                 )
             }
-            await AuthService.register(username, password, email)
+            await AuthService.register(username, email, password)
 
             response.json({
                 ok: true,
@@ -67,16 +66,13 @@ class AuthController {
         try{
             const {email, password} = request.body
 
-            /* 
-            - Validar que el email y password sean validas
-            */
-            const { authorization_token } = await AuthService.login(email, password)
+            const { auth_token } = await AuthService.login(email, password)
             return response.json({
                 ok: true,
                 message: 'Logueado con exito',
                 status: 200,
                 data: {
-                    authorization_token: authorization_token
+                    auth_token: auth_token
                 }
             })
         }
@@ -108,11 +104,7 @@ class AuthController {
             const {verification_token} = request.params
             await AuthService.verifyEmail(verification_token)
 
-            return response.json({
-                ok: true, 
-                status: 200,
-                message: 'Usuario validado'
-            })
+            return response.redirect(ENVIRONMENT.URL_FRONTEND + '/login')
         } 
         catch (error) {
             console.log(error)

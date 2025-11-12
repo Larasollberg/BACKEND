@@ -1,10 +1,7 @@
+import 'dotenv/config'
 import ENVIRONMENT from "./config/environment.config.js";
 import connectMongoDB from "./config/configMongoDB.config.js";
 import workspace_router from "./routes/workspace.router.js";
-
-
-connectMongoDB()
-import 'dotenv/config'
 import express from 'express'
 import auth_router from "./routes/auth.router.js";
 import UserRepository from "./repositories/user.repository.js";
@@ -12,9 +9,10 @@ import cors from 'cors'
 import authMiddleware from "./middleware/auth.middleware.js";
 import MemberWorkspaceRepository from "./repositories/memberWorkspace.repository.js";
 import member_router from "./routes/member.router.js";
-import pool from "./config/mysql.config.js";
+//import pool from "./config/mysql.config.js";
 import ChannelMessageRepository from "./repositories/channelMessage.repository.js";
 
+connectMongoDB()
 
 const app = express()
 
@@ -58,4 +56,4 @@ app.listen(
 )
 
 
-
+export default app

@@ -110,6 +110,7 @@ import nodemailer from 'nodemailer';
 import crypto from 'crypto';
 import ENVIRONMENT from '../config/environment.config.js'
 import { ServerError } from '../utils/customError.utils.js'
+import createTransporter from '../config/mailer.config.js';
 
 class AuthService {
     static async register(username, email, password) {
@@ -125,25 +126,38 @@ class AuthService {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         // Generar token
-        const verificationToken = crypto.randomBytes(32).toString('hex');
-
+        const verification_token = crypto.randomBytes(32).toString('hex')
+        
+        
+        const transporter = createTransporter()
         // Crear usuario
         await UserRepository.createUser({
             name: username,
             email,
             password: hashedPassword,
-            verificationToken,
+            verification_token,
             isVerified: false,
         });
 
         // Enviar email (configura nodemailer como antes)
-        const transporter = nodemailer.createTransport({ /* config */ });
+        //const transporter = nodemailer.createTransport({ /* config */ });
+        
         await transporter.sendMail({
             from: ENVIRONMENT.GMAIL_USER,
             to: email,
             subject: 'Verifica tu cuenta',
-            html: `<a href="${ENVIRONMENT.URL_FRONTEND}/verify?token=${verificationToken}">Verificar</a>`,
+            html: `<a href="${ENVIRONMENT.URL_API_BACKEND}/api/auth/verify-email/${verification_token}">Verificar</a>`,
         });
+    }
+
+    static async verifyEmail(verification_token) {
+        const user = await UserRepository.findByVerificationToken(verification_token);
+        if (!user) {
+            throw new ServerError(400, 'Token inválido');
+        }
+        user.isVerified = true;
+        user.verification_token = undefined;
+        await user.save();
     }
 
     static async login(email, password) {
@@ -159,15 +173,7 @@ class AuthService {
         return { auth_token };
     }
 
-    static async verifyEmail(token) {
-        const user = await UserRepository.findByVerificationToken(token);
-        if (!user) {
-            throw new ServerError(400, 'Token inválido');
-        }
-        user.isVerified = true;
-        user.verificationToken = undefined;
-        await user.save();
-    }
+    
 }
 
 export default AuthService

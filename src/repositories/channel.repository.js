@@ -1,9 +1,10 @@
-import pool from "../config/mysql.config.js";
+//import pool from "../config/mysql.config.js";
 import Channels from "../models/Channel.model.js";
+
 class ChannelRepository {
     /* 
     Mysql
-    */
+    
     static async create(name, isPrivate, workspace_id) {
         const query = `
     INSERT INTO Channels(name, private, workspace) VALUES(?, ?, ?)
@@ -51,11 +52,11 @@ class ChannelRepository {
             return null;
         }
         return channel_found;
-    }
+    }*/
 
-    /* 
-    Mongoose
-    static async create(name, private, workspace_id) {
+    
+    //Mongoose
+    /*static async create(name, private, workspace_id) {
         const new_channel = new Channels({
             name,
             private,
@@ -63,12 +64,12 @@ class ChannelRepository {
         });
         await new_channel.save();
         return new_channel;
-    }
+    }*/
     static async getAllByWorkspace(workspace_id) {
         return await Channels.find({ workspace_id });
     }
     static async getById(channel_id) {
         return await Channels.findById(channel_id);
-    } */
+    }
 }
-export default ChannelRepository;
+export default ChannelRepository

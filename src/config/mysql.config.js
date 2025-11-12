@@ -1,4 +1,4 @@
-import mysql from "mysql2/promise"
+/*import mysql from "mysql2/promise"
 import ENVIRONMENT from "./environment.config.js"
 
 const pool = mysql.createPool({
@@ -16,7 +16,7 @@ const pool = mysql.createPool({
 })
 .catch((err) => {
     console.log("Error d conexión: ", err)
-})*/
+})
 
-export default pool
+export default pool*/
 

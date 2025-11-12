@@ -101,8 +101,8 @@ class AuthController {
 
     static async verifyEmail(request, response) {
         try{
-            const {verification_token} = request.query
-            if (!token) {
+            const {verification_token} = request.params
+            if (!verification_token) {
                 throw new ServerError(400, 'Token de verificación requerido');
             }
             await AuthService.verifyEmail(verification_token)

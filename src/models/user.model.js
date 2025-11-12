@@ -42,7 +42,6 @@ const userSchema = new mongoose.Schema(
     }
 )
 
-//Crear el modelo de User, cada accion que hagamos a la coleccion de User se hara por medio del modelo
 
 const Users = mongoose.model('User', userSchema)
 

@@ -146,7 +146,7 @@ class AuthService {
             from: ENVIRONMENT.GMAIL_USER,
             to: email,
             subject: 'Verifica tu cuenta',
-            html: `<a href="${ENVIRONMENT.URL_API_BACKEND}/api/auth/verify-email/${verification_token}">Verificar</a>`,
+            html: `<a href="${ENVIRONMENT.URL_API_BACKEND}/api/auth/verify/${verification_token}">Verificar</a>`,
         });
     }
 

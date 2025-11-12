@@ -2,7 +2,7 @@ import ENVIRONMENT from "../config/environment.config.js"
 import { ServerError } from "../utils/customError.utils.js"
 import jwt from 'jsonwebtoken'
 
-const authMiddleware = (request, response, next) => {
+/*const authMiddleware = (request, response, next) => {
 
     try {
         const authorization_header = request.headers.authorization
@@ -64,14 +64,14 @@ const authMiddleware = (request, response, next) => {
 
 }
 
-export default authMiddleware
+export default authMiddleware*/
 
 
 /* 
 2da version de auth middleware con roles
 */
 
-export const authByRoleMiddleware = (valid_roles = []) => {
+export const authMiddleware = (valid_roles = []) => {
 
 
     return (request, response, next) => {
@@ -141,3 +141,4 @@ export const authByRoleMiddleware = (valid_roles = []) => {
     }
 
 }
+export default authMiddleware

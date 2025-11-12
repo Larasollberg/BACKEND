@@ -1,7 +1,5 @@
 import mongoose from "mongoose";
 
-
-//El esquema tiene los "contratos" de que es un User que luego podremos asignarselo a la coleccion de usuarios
 const userSchema = new mongoose.Schema(
     {
         name: {
@@ -21,6 +19,13 @@ const userSchema = new mongoose.Schema(
             type: Boolean,
             required: true,
             default: false
+        },
+        verificationToken: { 
+            type: String 
+        },
+        isVerified: { 
+            type: Boolean, 
+            default: false 
         },
         created_at: {
             type: Date, 

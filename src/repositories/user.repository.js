@@ -1,22 +1,18 @@
-import pool from "../config/mysql.config.js";
+
 import Users from "../models/User.model.js";
 
 
 class UserRepository {
 
-    static async createUser(name, email, password){
+    static async createUser(userData){
         //Logica de interaccion con la DB para crear el usuario
-        const result =  await Users.create({
-            name: name,
-            email: email,
-            password: password,
-        })
+        const result =  await Users.create(userData)
         return result
     }
 
-    static async getById (user_id){
-        const user_found = await Users.findById(user_id)
-        return user_found
+    static async findByEmail (email){
+        const user = await Users.findOne({email: email })
+        return user
     }
 
     static async deleteById(user_id) {
@@ -28,9 +24,7 @@ class UserRepository {
         const user_updated = await Users.findByIdAndUpdate(
             user_id,
             new_values,
-            {
-                new: true 
-            }
+            { new: true }
         )
 
         return user_updated
@@ -41,7 +35,15 @@ class UserRepository {
         const user = await Users.findOne({email: email})
         return user
     }
+
+        static async findByVerificationToken(token) {
+        const user = await Users.findOne({ verificationToken: token });
+        return user;
+    }
+
 }
+
+
 
 export default UserRepository
 

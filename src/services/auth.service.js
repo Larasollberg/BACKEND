@@ -1,11 +1,11 @@
-import transporter from "../config/mailer.config.js"
+/*import transporter from "../config/mailer.config.js"
 import UserRepository from "../repositories/user.repository.js"
 import { ServerError } from "../utils/customError.utils.js"
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import ENVIRONMENT from "../config/environment.config.js"
+import ENVIRONMENT from "../config/environment.config.js"*/
 
-class AuthService {
+/*class AuthService {
     static async register(name, email, password) {
         console.log(name, email, password)
 
@@ -21,10 +21,9 @@ class AuthService {
         const user_id_created = user_created._id
         
         const verification_token = jwt.sign(
-            {
-                user_id: user_id_created
-            },
+            { user_id: user_id_created },
             ENVIRONMENT.JWT_SECRET_KEY
+            
         )
         //Enviar un mail de verificacion
         await transporter.sendMail({
@@ -32,9 +31,9 @@ class AuthService {
             to: email,
             subject: 'Verificacion de correo electronico',
             html: `
-            <h1>Por favor verifica tu email</h1>
-            <p>Este es un mail de verificacion</p>
-            <a href='${ENVIRONMENT.URL_API_BACKEND}/api/auth/verify-email/${verification_token}'>Verificar email</a>
+            <h1>¡Bienvenido!</h1>
+            <p>Haz click en el enlace para verificar tu email</p>
+            <a href='${ENVIRONMENT.URL_API_BACKEND}/verify-email/${verification_token}'>Verificar email</a>
             `
         })
         
@@ -101,6 +100,73 @@ class AuthService {
             auth_token: auth_token
         }
 
+    }
+}*/
+
+import UserRepository from '../repositories/user.repository.js';
+import bcrypt from 'bcryptjs';
+import jwt from 'jsonwebtoken';
+import nodemailer from 'nodemailer';
+import crypto from 'crypto';
+import ENVIRONMENT from '../config/environment.config.js'
+import { ServerError } from '../utils/customError.utils.js'
+
+class AuthService {
+    static async register(username, email, password) {
+        // Verificar si existe
+        console.log ('Email recibido:', email, 'Tipo', typeof email)
+        const existingUser = await UserRepository.findByEmail(email);
+        console.log('Usuario encontrado:', existingUser)
+        if (existingUser) {
+            throw new ServerError(400, 'El email ya está registrado');
+        }
+
+        // Hash password
+        const hashedPassword = await bcrypt.hash(password, 10);
+
+        // Generar token
+        const verificationToken = crypto.randomBytes(32).toString('hex');
+
+        // Crear usuario
+        await UserRepository.createUser({
+            name: username,
+            email,
+            password: hashedPassword,
+            verificationToken,
+            isVerified: false,
+        });
+
+        // Enviar email (configura nodemailer como antes)
+        const transporter = nodemailer.createTransport({ /* config */ });
+        await transporter.sendMail({
+            from: ENVIRONMENT.GMAIL_USER,
+            to: email,
+            subject: 'Verifica tu cuenta',
+            html: `<a href="${ENVIRONMENT.URL_FRONTEND}/verify?token=${verificationToken}">Verificar</a>`,
+        });
+    }
+
+    static async login(email, password) {
+        // Tu lógica existente, pero agrega verificación de isVerified
+        const user = await UserRepository.findByEmail(email);
+        if (!user || !(await bcrypt.compare(password, user.password))) {
+            throw new ServerError(401, 'Credenciales inválidas');
+        }
+        if (!user.isVerified) {
+            throw new ServerError(403, 'Verifica tu email antes de iniciar sesión');
+        }
+        const auth_token = jwt.sign({ userId: user._id }, ENVIRONMENT.JWT_SECRET, { expiresIn: '1h' });
+        return { auth_token };
+    }
+
+    static async verifyEmail(token) {
+        const user = await UserRepository.findByVerificationToken(token);
+        if (!user) {
+            throw new ServerError(400, 'Token inválido');
+        }
+        user.isVerified = true;
+        user.verificationToken = undefined;
+        await user.save();
     }
 }
 

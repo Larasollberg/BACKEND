@@ -15,7 +15,6 @@ import member_router from "./routes/member.router.js";
 import pool from "./config/mysql.config.js";
 import ChannelMessageRepository from "./repositories/channelMessage.repository.js";
 
-console.log('CLAVE SECRETA CARGADA:', process.env.JWT_SECRET_KEY);
 
 const app = express()
 

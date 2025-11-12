@@ -3,17 +3,17 @@ import WorkspacesRepository from '../repositories/workspace.repository.js'
 import { validarId } from '../utils/validations.utils.js'
 import { ServerError } from '../utils/customError.utils.js'
 import WorkspaceController from '../controllers/workspace.controllers.js'
-import authMiddleware, { authByRoleMiddleware } from '../middleware/auth.middleware.js'
-import workspaceMiddleware from '../middleware/workspace.middleware.js'
-import ChannelController from '../controllers/channel.controller.js'
+import authMiddleware from '../middleware/auth.middleware.js'
+import workspaceMiddleware  from '../middleware/workspace.middleware.js'
 import channelMiddleware from '../middleware/channel.middleware.js'
+import ChannelController from '../controllers/channel.controller.js'
 import MessageController from '../controllers/message.controller.js'
 
-//Manejar consultas referidas a workspace
+
 
 const workspace_router = express.Router()
 
-//Configuracion a nivel de ruta
+
 workspace_router.use(authMiddleware)
 
 workspace_router.get('/',   WorkspaceController.getAll )

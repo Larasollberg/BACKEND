@@ -1,25 +1,25 @@
 import 'dotenv/config'
+
+connectMongoDB()
+
 import ENVIRONMENT from "./config/environment.config.js";
 import connectMongoDB from "./config/configMongoDB.config.js";
 import workspace_router from "./routes/workspace.router.js";
 import express from 'express'
 import auth_router from "./routes/auth.router.js";
-import UserRepository from "./repositories/user.repository.js";
 import cors from 'cors'
 import authMiddleware from "./middleware/auth.middleware.js";
-import MemberWorkspaceRepository from "./repositories/memberWorkspace.repository.js";
 import member_router from "./routes/member.router.js";
-//import pool from "./config/mysql.config.js";
-import ChannelMessageRepository from "./repositories/channelMessage.repository.js";
+import AuthController from "./controllers/auth.controller.js"
 
-connectMongoDB()
 
 const app = express()
 
 app.use(cors())
 app.use(express.json())
+app.get('/auth/verify/:token', AuthController.verifyEmail)
 
-app.use('/api/auth', auth_router)
+//app.use('/auth', auth_router)
 app.use('/api/workspace', workspace_router)
 app.use('/api/members', member_router)
 

@@ -1,8 +1,9 @@
 import ENVIRONMENT from "../config/environment.config.js"
 import AuthService from "../services/auth.service.js"
-import { ServerError } from "../utils/customError.utils.js"
+import jwt from 'jsonwebtoken'
 
 class AuthController {
+    
     static async register(request, response) {
         try {
 
@@ -66,13 +67,14 @@ class AuthController {
         try{
             const {email, password} = request.body
 
-            const { auth_token } = await AuthService.login(email, password)
+            const { authorization_token, username } = await AuthService.login(email, password)
             return response.json({
                 ok: true,
                 message: 'Logueado con exito',
                 status: 200,
                 data: {
-                    auth_token: auth_token
+                    authorization_token: authorization_token,
+                    username: username
                 }
             })
         }
@@ -101,10 +103,8 @@ class AuthController {
 
     static async verifyEmail(request, response) {
         try{
-            const {verification_token} = request.params
-            if (!verification_token) {
-                throw new ServerError(400, 'Token de verificación requerido');
-            }
+            const { verification_token } = request.params
+            
             await AuthService.verifyEmail(verification_token)
 
             return response.redirect(ENVIRONMENT.URL_FRONTEND + '/login')

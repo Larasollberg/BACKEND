@@ -3,7 +3,7 @@ import nodemailer from 'nodemailer'
 import ENVIRONMENT from './environment.config.js'
 
 
-const createTransporter = () => {
+/*const createTransporter = () => {
     // Si necesitas asegurarte de que el ambiente se lea justo antes de usarse:
     // **NOTA:** Esto asume que ENVIRONMENT.js ya ha cargado process.env
     
@@ -16,25 +16,26 @@ const createTransporter = () => {
     });
 };
 
-export default createTransporter
+export default createTransporter*/
 
 
 
 
-
-
-
-/*const transporter = nodemailer.createTransport(
-    {
+const transporter = nodemailer.createTransport({
         service: 'gmail',
         auth: {
             user: ENVIRONMENT.GMAIL_USER,
             pass: ENVIRONMENT.GMAIL_PASSWORD
-        },
-    /*tls: {
-        rejectUnauthorized: false 
-        export default transporter
-    }*/
+        }
+    });
+    
+    transporter.verify((error, success) => {
+    if (error) {
+        console.error('Error al conectar con Gmail:', error);
+    } else {
+        console.log('Servidor de correo listo para enviar mensajes');
+    }
+});
 
 
-
+export default transporter

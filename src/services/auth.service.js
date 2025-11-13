@@ -1,11 +1,12 @@
-/*import transporter from "../config/mailer.config.js"
 import UserRepository from "../repositories/user.repository.js"
+import transporter from "../config/mailer.config.js"
 import { ServerError } from "../utils/customError.utils.js"
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
-import ENVIRONMENT from "../config/environment.config.js"*/
+import ENVIRONMENT from "../config/environment.config.js"
 
-/*class AuthService {
+class AuthService {
+    
     static async register(name, email, password) {
         console.log(name, email, password)
 
@@ -17,12 +18,19 @@ import ENVIRONMENT from "../config/environment.config.js"*/
 
         
         const password_hashed = await bcrypt.hash(password, 12)
-        const user_created = await UserRepository.createUser(name, email, password_hashed)
-        const user_id_created = user_created._id
+        const userData = {
+            name: name,
+            email: email,
+            password: password_hashed,
+            isVerified: false,
+        }
+        const user_created = await UserRepository.createUser(userData)
         
         const verification_token = jwt.sign(
-            { user_id: user_id_created },
-            ENVIRONMENT.JWT_SECRET_KEY
+            { email: email,
+                user_id: user_created._id },
+            
+                ENVIRONMENT.JWT_SECRET_KEY
             
         )
         //Enviar un mail de verificacion
@@ -33,7 +41,7 @@ import ENVIRONMENT from "../config/environment.config.js"*/
             html: `
             <h1>¡Bienvenido!</h1>
             <p>Haz click en el enlace para verificar tu email</p>
-            <a href='${ENVIRONMENT.URL_API_BACKEND}/verify-email/${verification_token}'>Verificar email</a>
+            <a href='${ENVIRONMENT.URL_API_BACKEND}/api/auth/verify-email/${verification_token}'>Verificar email</a>
             `
         })
         
@@ -45,7 +53,7 @@ import ENVIRONMENT from "../config/environment.config.js"*/
         try{
             const payload = jwt.verify(verification_token, ENVIRONMENT.JWT_SECRET_KEY)
             
-            const {user_id} = payload 
+            /*const {user_id} = payload 
             if(!user_id){
                 throw new ServerError (400, 'Accion denegada, token con datos insuficientes')
             }
@@ -55,9 +63,9 @@ import ENVIRONMENT from "../config/environment.config.js"*/
             }
             if(user_found.verified_email){
                 throw new ServerError (400, 'Usuario ya validado')
-            }
+            }*/
 
-            await UserRepository.updateById(user_id, {verified_email: true})
+            await UserRepository.updateById(payload.user_id, { verified_email: true });
 
             return 
 
@@ -80,15 +88,16 @@ import ENVIRONMENT from "../config/environment.config.js"*/
             throw new ServerError(401, 'Email no verificado')
         }
         
-        const is_same_password = await bcrypt.compare(password, user_found.password)
+        const is_same_password = await bcrypt.compare(password, user.password)
         if(!is_same_password){
             throw new ServerError(401, 'Contraseña incorrecta')
         }
-        const auth_token = jwt.sign(
+        const autorization_token = jwt.sign(
             {
-                id: user_found._id,
-                name: user_found.name,
-                email: user_found.email
+                id: user._id,
+                name: user.name,
+                email: user.email,
+                created_at: user.created_at
             },
             ENVIRONMENT.JWT_SECRET_KEY,
             {
@@ -97,13 +106,18 @@ import ENVIRONMENT from "../config/environment.config.js"*/
         )
 
         return {
-            auth_token: auth_token
+            authorization_token,
+            user: {
+                _id: user._id,
+                name: user.name,
+                email: user.email
+            }
         }
 
     }
-}*/
+}
 
-import UserRepository from '../repositories/user.repository.js';
+/*import UserRepository from '../repositories/user.repository.js';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import nodemailer from 'nodemailer';
@@ -140,13 +154,13 @@ class AuthService {
         });
 
         // Enviar email (configura nodemailer como antes)
-        //const transporter = nodemailer.createTransport({ /* config */ });
+        //const transporter = nodemailer.createTransport
         
         await transporter.sendMail({
             from: ENVIRONMENT.GMAIL_USER,
             to: email,
             subject: 'Verifica tu cuenta',
-            html: `<a href="${ENVIRONMENT.URL_API_BACKEND}/api/auth/verify/${verification_token}">Verificar</a>`,
+            html: `<a href="${ENVIRONMENT.URL_API_BACKEND}/auth/verify/${verification_token}">Verificar</a>`,
         });
     }
 
@@ -174,6 +188,6 @@ class AuthService {
     }
 
     
-}
+}*/
 
 export default AuthService
